@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences stamp="4">
+	<com.4d>
+		<general/>
+	</com.4d>
+	<sets>
+		<web><web_ip_address></web_ip_address></web>
+	</sets>
+</preferences>

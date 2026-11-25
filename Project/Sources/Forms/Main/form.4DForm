@@ -1,0 +1,962 @@
+{
+	"$4d": {
+		"version": "1",
+		"kind": "form"
+	},
+	"windowSizingX": "variable",
+	"windowSizingY": "variable",
+	"windowMinWidth": 1000,
+	"windowMinHeight": 700,
+	"windowMaxWidth": 32767,
+	"windowMaxHeight": 32767,
+	"rightMargin": 20,
+	"bottomMargin": 20,
+	"width": 1180,
+	"height": 880,
+	"events": [
+		"onLoad"
+	],
+	"windowTitle": "CalDAV demo — miyako/CalDAV component",
+	"destination": "detailScreen",
+	"method": "method.4dm",
+	"formClass": "DemoForm",
+	"pages": [
+		{
+			"objects": {
+				"headerText": {
+					"type": "input",
+					"left": 20,
+					"top": 14,
+					"width": 700,
+					"height": 24,
+					"dataSource": "Form.headerText",
+					"dataSourceTypeHint": "text",
+					"enterable": false,
+					"hideFocusRing": true,
+					"borderStyle": "none",
+					"fontSize": 16,
+					"fontWeight": "bold"
+				},
+				"versionText": {
+					"type": "input",
+					"left": 740,
+					"top": 16,
+					"width": 420,
+					"height": 20,
+					"dataSource": "Form.versionText",
+					"dataSourceTypeHint": "text",
+					"enterable": false,
+					"hideFocusRing": true,
+					"borderStyle": "none",
+					"textAlign": "right"
+				},
+				"tabMain": {
+					"type": "tab",
+					"left": 20,
+					"top": 46,
+					"width": 1140,
+					"height": 26,
+					"labels": [
+						"Server",
+						"Query",
+						"Offline",
+						"Mutate",
+						"Protocol log"
+					],
+					"action": "gotoPage"
+				},
+				"statusText": {
+					"type": "input",
+					"left": 20,
+					"top": 848,
+					"width": 900,
+					"height": 22,
+					"dataSource": "Form.statusText",
+					"dataSourceTypeHint": "text",
+					"enterable": false,
+					"hideFocusRing": true,
+					"borderStyle": "none"
+				},
+				"lastOperationText": {
+					"type": "input",
+					"left": 930,
+					"top": 848,
+					"width": 230,
+					"height": 22,
+					"dataSource": "Form.lastOperation",
+					"dataSourceTypeHint": "text",
+					"enterable": false,
+					"hideFocusRing": true,
+					"borderStyle": "none",
+					"textAlign": "right"
+				}
+			}
+		},
+		{
+			"objects": {
+				"grpConnection": {
+					"type": "groupBox",
+					"left": 20,
+					"top": 84,
+					"width": 620,
+					"height": 300,
+					"text": "Connection and discovery"
+				},
+				"lblUrl": {
+					"type": "text",
+					"left": 36,
+					"top": 116,
+					"width": 92,
+					"height": 20,
+					"text": "Start URL"
+				},
+				"urlInput": {
+					"type": "input",
+					"left": 132,
+					"top": 112,
+					"width": 492,
+					"height": 26,
+					"dataSource": "Form.url",
+					"dataSourceTypeHint": "text"
+				},
+				"lblUser": {
+					"type": "text",
+					"left": 36,
+					"top": 152,
+					"width": 60,
+					"height": 20,
+					"text": "User"
+				},
+				"userInput": {
+					"type": "input",
+					"left": 132,
+					"top": 148,
+					"width": 180,
+					"height": 26,
+					"dataSource": "Form.username",
+					"dataSourceTypeHint": "text"
+				},
+				"lblPassword": {
+					"type": "text",
+					"left": 330,
+					"top": 152,
+					"width": 70,
+					"height": 20,
+					"text": "Password"
+				},
+				"passwordInput": {
+					"type": "input",
+					"left": 404,
+					"top": 148,
+					"width": 220,
+					"height": 26,
+					"dataSource": "Form.password",
+					"dataSourceTypeHint": "text",
+					"fontFamily": "%password",
+					"fontSize": 13
+				},
+				"loopbackCheck": {
+					"type": "checkbox",
+					"left": 132,
+					"top": 184,
+					"width": 492,
+					"height": 22,
+					"dataSource": "Form.loopback",
+					"dataSourceTypeHint": "boolean",
+					"text": "Allow plain HTTP on a loopback address (allowInsecureLoopback)"
+				},
+				"btnDiscover": {
+					"type": "button",
+					"left": 132,
+					"top": 214,
+					"width": 150,
+					"height": 30,
+					"text": "Discover",
+					"method": "ObjectMethods/btnDiscover.4dm",
+					"events": [
+						"onClick"
+					]
+				},
+				"discoverHint": {
+					"type": "text",
+					"left": 296,
+					"top": 220,
+					"width": 328,
+					"height": 20,
+					"text": "PROPFIND: start → principal → home"
+				},
+				"lblPrincipal": {
+					"type": "text",
+					"left": 36,
+					"top": 254,
+					"width": 92,
+					"height": 20,
+					"text": "Principal"
+				},
+				"principalInput": {
+					"type": "input",
+					"left": 132,
+					"top": 250,
+					"width": 492,
+					"height": 22,
+					"dataSource": "Form.principalURL",
+					"dataSourceTypeHint": "text",
+					"enterable": false,
+					"hideFocusRing": true
+				},
+				"lblHome": {
+					"type": "text",
+					"left": 36,
+					"top": 284,
+					"width": 92,
+					"height": 20,
+					"text": "Home"
+				},
+				"homeInput": {
+					"type": "input",
+					"left": 132,
+					"top": 280,
+					"width": 492,
+					"height": 22,
+					"dataSource": "Form.homeURL",
+					"dataSourceTypeHint": "text",
+					"enterable": false,
+					"hideFocusRing": true
+				},
+				"lblComponent": {
+					"type": "text",
+					"left": 36,
+					"top": 314,
+					"width": 92,
+					"height": 20,
+					"text": "Component"
+				},
+				"versionInput": {
+					"type": "input",
+					"left": 132,
+					"top": 310,
+					"width": 492,
+					"height": 22,
+					"dataSource": "Form.versionText",
+					"dataSourceTypeHint": "text",
+					"enterable": false,
+					"hideFocusRing": true,
+					"borderStyle": "none"
+				},
+				"grpExplain": {
+					"type": "groupBox",
+					"left": 20,
+					"top": 396,
+					"width": 620,
+					"height": 444,
+					"text": "What this page proves"
+				},
+				"explainText": {
+					"type": "text",
+					"left": 36,
+					"top": 424,
+					"width": 588,
+					"height": 400,
+					"text": "The component ships its CLI as a resource; 4D runs it as a child\nprocess and reads JSON from stdin. Nothing is linked in-process.\n\nDiscover walks three PROPFIND calls:\n  1. the start URL answers current-user-principal\n  2. the principal answers calendar-home-set\n  3. the home is listed at Depth 1 for calendar collections\n\nThe password never becomes a process argument. It travels in the\nJSON on stdin, and only transiently in the caller's request object.\n\nThe right panel shows the redacted request exactly as it was sent.\n\nPoint the URL at a real CalDAV server, unsend the loopback opt-in and\nsupply TLS credentials: only the URL and the checkbox need to change."
+				},
+				"grpCalendars": {
+					"type": "groupBox",
+					"left": 660,
+					"top": 84,
+					"width": 500,
+					"height": 300,
+					"text": "Calendars reported by the home collection"
+				},
+				"calendarList": {
+					"type": "listbox",
+					"listboxType": "collection",
+					"left": 672,
+					"top": 112,
+					"width": 470,
+					"height": 256,
+					"dataSource": "Form.calendars",
+					"currentItemSource": "Form.selectedCalendar",
+					"rowHeight": "24px",
+					"verticalAlign": "middle",
+					"resizingMode": "legacy",
+					"method": "ObjectMethods/calendarList.4dm",
+					"events": [
+						"onClick"
+					],
+					"columns": [
+						{
+							"name": "calName",
+							"dataSource": "This.name",
+							"width": 120,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrCalName",
+								"text": "Name"
+							}
+						},
+						{
+							"name": "calComponents",
+							"dataSource": "This.componentsText",
+							"width": 90,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrCalComponents",
+								"text": "Supports"
+							}
+						},
+						{
+							"name": "calDescription",
+							"dataSource": "This.descriptionText",
+							"width": 260,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrCalDescription",
+								"text": "Description"
+							}
+						}
+					]
+				},
+				"grpRequest": {
+					"type": "groupBox",
+					"left": 660,
+					"top": 396,
+					"width": 500,
+					"height": 444,
+					"text": "Last request (password redacted)"
+				},
+				"requestText": {
+					"type": "input",
+					"left": 672,
+					"top": 424,
+					"width": 476,
+					"height": 404,
+					"dataSource": "Form.requestText",
+					"dataSourceTypeHint": "text",
+					"multiline": "yes",
+					"wordwrap": "normal",
+					"enterable": false,
+					"fontFamily": "Courier New",
+					"fontSize": 10
+				}
+			}
+		},
+		{
+			"objects": {
+				"grpRange": {
+					"type": "groupBox",
+					"left": 20,
+					"top": 84,
+					"width": 620,
+					"height": 180,
+					"text": "Collection and query window"
+				},
+				"selectionInput": {
+					"type": "input",
+					"left": 36,
+					"top": 112,
+					"width": 588,
+					"height": 34,
+					"dataSource": "Form.selectionText",
+					"dataSourceTypeHint": "text",
+					"multiline": "yes",
+					"wordwrap": "normal",
+					"enterable": false,
+					"hideFocusRing": true
+				},
+				"lblStart": {
+					"type": "text",
+					"left": 36,
+					"top": 152,
+					"width": 90,
+					"height": 20,
+					"text": "Start (UTC)"
+				},
+				"startInput": {
+					"type": "input",
+					"left": 36,
+					"top": 174,
+					"width": 240,
+					"height": 26,
+					"dataSource": "Form.startText",
+					"dataSourceTypeHint": "text"
+				},
+				"lblEnd": {
+					"type": "text",
+					"left": 296,
+					"top": 152,
+					"width": 90,
+					"height": 20,
+					"text": "End (UTC)"
+				},
+				"endInput": {
+					"type": "input",
+					"left": 296,
+					"top": 174,
+					"width": 170,
+					"height": 26,
+					"dataSource": "Form.endText",
+					"dataSourceTypeHint": "text"
+				},
+				"rangeHint": {
+					"type": "text",
+					"left": 36,
+					"top": 210,
+					"width": 420,
+					"height": 20,
+					"text": "RFC 3339, whole seconds, Z suffix, end exclusive"
+				},
+				"btnQuery": {
+					"type": "button",
+					"left": 480,
+					"top": 172,
+					"width": 144,
+					"height": 30,
+					"text": "Query",
+					"method": "ObjectMethods/btnQuery.4dm",
+					"events": [
+						"onClick"
+					]
+				},
+				"grpResources": {
+					"type": "groupBox",
+					"left": 20,
+					"top": 276,
+					"width": 620,
+					"height": 564,
+					"text": "Resources returned in the window"
+				},
+				"resourceList": {
+					"type": "listbox",
+					"listboxType": "collection",
+					"left": 32,
+					"top": 304,
+					"width": 596,
+					"height": 470,
+					"dataSource": "Form.resources",
+					"currentItemSource": "Form.selectedResource",
+					"rowHeight": "24px",
+					"verticalAlign": "middle",
+					"resizingMode": "legacy",
+					"method": "ObjectMethods/resourceList.4dm",
+					"events": [
+						"onClick"
+					],
+					"columns": [
+						{
+							"name": "resSummary",
+							"dataSource": "This.summary",
+							"width": 240,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrResSummary",
+								"text": "First event summary"
+							}
+						},
+						{
+							"name": "resStart",
+							"dataSource": "This.start",
+							"width": 190,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrResStart",
+								"text": "Start"
+							}
+						},
+						{
+							"name": "resCount",
+							"dataSource": "This.countText",
+							"width": 70,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrResCount",
+								"text": "Events"
+							}
+						}
+					]
+				},
+				"btnGet": {
+					"type": "button",
+					"left": 32,
+					"top": 786,
+					"width": 170,
+					"height": 30,
+					"text": "Re-read with GET",
+					"method": "ObjectMethods/btnGet.4dm",
+					"events": [
+						"onClick"
+					]
+				},
+				"getHint": {
+					"type": "text",
+					"left": 214,
+					"top": 792,
+					"width": 400,
+					"height": 20,
+					"text": "The selection also drives the Mutate page."
+				},
+				"grpDetail": {
+					"type": "groupBox",
+					"left": 660,
+					"top": 84,
+					"width": 500,
+					"height": 756,
+					"text": "Raw iCalendar of the selection (never expanded)"
+				},
+				"detailText": {
+					"type": "input",
+					"left": 672,
+					"top": 112,
+					"width": 476,
+					"height": 716,
+					"dataSource": "Form.detailText",
+					"dataSourceTypeHint": "text",
+					"multiline": "yes",
+					"wordwrap": "normal",
+					"enterable": false,
+					"fontFamily": "Courier New",
+					"fontSize": 11
+				}
+			}
+		},
+		{
+			"objects": {
+				"grpBuild": {
+					"type": "groupBox",
+					"left": 20,
+					"top": 84,
+					"width": 560,
+					"height": 320,
+					"text": "Event object to iCalendar (build, offline)"
+				},
+				"lblSummary": {
+					"type": "text",
+					"left": 36,
+					"top": 116,
+					"width": 90,
+					"height": 20,
+					"text": "Summary"
+				},
+				"summaryInput": {
+					"type": "input",
+					"left": 36,
+					"top": 138,
+					"width": 528,
+					"height": 26,
+					"dataSource": "Form.summary",
+					"dataSourceTypeHint": "text"
+				},
+				"lblLocation": {
+					"type": "text",
+					"left": 36,
+					"top": 172,
+					"width": 90,
+					"height": 20,
+					"text": "Location"
+				},
+				"locationInput": {
+					"type": "input",
+					"left": 36,
+					"top": 194,
+					"width": 528,
+					"height": 26,
+					"dataSource": "Form.location",
+					"dataSourceTypeHint": "text"
+				},
+				"lblEventStart": {
+					"type": "text",
+					"left": 36,
+					"top": 228,
+					"width": 120,
+					"height": 20,
+					"text": "Start (UTC)"
+				},
+				"eventStartInput": {
+					"type": "input",
+					"left": 36,
+					"top": 250,
+					"width": 250,
+					"height": 26,
+					"dataSource": "Form.eventStart",
+					"dataSourceTypeHint": "text"
+				},
+				"lblEventEnd": {
+					"type": "text",
+					"left": 300,
+					"top": 228,
+					"width": 120,
+					"height": 20,
+					"text": "End (UTC)"
+				},
+				"eventEndInput": {
+					"type": "input",
+					"left": 300,
+					"top": 250,
+					"width": 264,
+					"height": 26,
+					"dataSource": "Form.eventEnd",
+					"dataSourceTypeHint": "text"
+				},
+				"allDayCheck": {
+					"type": "checkbox",
+					"left": 36,
+					"top": 284,
+					"width": 528,
+					"height": 22,
+					"dataSource": "Form.allDay",
+					"dataSourceTypeHint": "boolean",
+					"text": "All day (dates only, end date exclusive)"
+				},
+				"btnBuild": {
+					"type": "button",
+					"left": 36,
+					"top": 314,
+					"width": 140,
+					"height": 30,
+					"text": "Build",
+					"method": "ObjectMethods/btnBuild.4dm",
+					"events": [
+						"onClick"
+					]
+				},
+				"btnInspect": {
+					"type": "button",
+					"left": 188,
+					"top": 314,
+					"width": 140,
+					"height": 30,
+					"text": "Inspect",
+					"method": "ObjectMethods/btnInspect.4dm",
+					"events": [
+						"onClick"
+					]
+				},
+				"btnLoad": {
+					"type": "button",
+					"left": 340,
+					"top": 314,
+					"width": 224,
+					"height": 30,
+					"text": "Load the selected resource",
+					"method": "ObjectMethods/btnLoad.4dm",
+					"events": [
+						"onClick"
+					]
+				},
+				"grpInspect": {
+					"type": "groupBox",
+					"left": 20,
+					"top": 416,
+					"width": 560,
+					"height": 424,
+					"text": "Parsed fields (inspect, offline)"
+				},
+				"inspectText": {
+					"type": "input",
+					"left": 32,
+					"top": 444,
+					"width": 536,
+					"height": 384,
+					"dataSource": "Form.inspectText",
+					"dataSourceTypeHint": "text",
+					"multiline": "yes",
+					"wordwrap": "normal",
+					"enterable": false,
+					"fontFamily": "Courier New",
+					"fontSize": 11
+				},
+				"grpIcal": {
+					"type": "groupBox",
+					"left": 600,
+					"top": 84,
+					"width": 560,
+					"height": 756,
+					"text": "iCalendar text — edit it to provoke a parse failure"
+				},
+				"icalendarText": {
+					"type": "input",
+					"left": 612,
+					"top": 112,
+					"width": 536,
+					"height": 716,
+					"dataSource": "Form.icalendarText",
+					"dataSourceTypeHint": "text",
+					"multiline": "yes",
+					"wordwrap": "none",
+					"spellcheck": false,
+					"fontFamily": "Courier New",
+					"fontSize": 11
+				}
+			}
+		},
+		{
+			"objects": {
+				"grpTarget": {
+					"type": "groupBox",
+					"left": 20,
+					"top": 84,
+					"width": 620,
+					"height": 240,
+					"text": "Current selection"
+				},
+				"lblTargetURL": {
+					"type": "text",
+					"left": 36,
+					"top": 116,
+					"width": 90,
+					"height": 20,
+					"text": "URL"
+				},
+				"targetURLInput": {
+					"type": "input",
+					"left": 36,
+					"top": 138,
+					"width": 588,
+					"height": 26,
+					"dataSource": "Form.targetURL",
+					"dataSourceTypeHint": "text",
+					"enterable": false,
+					"hideFocusRing": true
+				},
+				"lblTargetETag": {
+					"type": "text",
+					"left": 36,
+					"top": 172,
+					"width": 90,
+					"height": 20,
+					"text": "ETag"
+				},
+				"targetETagInput": {
+					"type": "input",
+					"left": 36,
+					"top": 194,
+					"width": 588,
+					"height": 26,
+					"dataSource": "Form.targetETag",
+					"dataSourceTypeHint": "text",
+					"enterable": false,
+					"hideFocusRing": true
+				},
+				"targetHint": {
+					"type": "text",
+					"left": 36,
+					"top": 232,
+					"width": 588,
+					"height": 60,
+					"text": "Updates and deletes are always conditional: the component sends the ETag it\njust read and the server refuses the write when it is stale. There is no\nunconditional PUT in this API."
+				},
+				"grpOps": {
+					"type": "groupBox",
+					"left": 20,
+					"top": 336,
+					"width": 620,
+					"height": 504,
+					"text": "Operations"
+				},
+				"btnCreate": {
+					"type": "button",
+					"left": 36,
+					"top": 368,
+					"width": 170,
+					"height": 30,
+					"text": "Create",
+					"method": "ObjectMethods/btnCreate.4dm",
+					"events": [
+						"onClick"
+					]
+				},
+				"btnUpdate": {
+					"type": "button",
+					"left": 218,
+					"top": 368,
+					"width": 182,
+					"height": 30,
+					"text": "Update first SUMMARY",
+					"method": "ObjectMethods/btnUpdate.4dm",
+					"events": [
+						"onClick"
+					]
+				},
+				"btnDelete": {
+					"type": "button",
+					"left": 412,
+					"top": 368,
+					"width": 120,
+					"height": 30,
+					"text": "Delete",
+					"method": "ObjectMethods/btnDelete.4dm",
+					"events": [
+						"onClick"
+					]
+				},
+				"btnConflict": {
+					"type": "button",
+					"left": 36,
+					"top": 412,
+					"width": 352,
+					"height": 30,
+					"text": "Demonstrate a stale-ETag conflict (412)",
+					"method": "ObjectMethods/btnConflict.4dm",
+					"events": [
+						"onClick"
+					]
+				},
+				"mutateHintInput": {
+					"type": "input",
+					"left": 36,
+					"top": 456,
+					"width": 588,
+					"height": 368,
+					"dataSource": "Form.mutateHint",
+					"dataSourceTypeHint": "text",
+					"multiline": "yes",
+					"wordwrap": "normal",
+					"enterable": false,
+					"borderStyle": "none"
+				},
+				"grpResult": {
+					"type": "groupBox",
+					"left": 660,
+					"top": 84,
+					"width": 500,
+					"height": 756,
+					"text": "Result of the last mutation"
+				},
+				"resultText": {
+					"type": "input",
+					"left": 672,
+					"top": 112,
+					"width": 476,
+					"height": 716,
+					"dataSource": "Form.resultText",
+					"dataSourceTypeHint": "text",
+					"multiline": "yes",
+					"wordwrap": "normal",
+					"enterable": false,
+					"fontFamily": "Courier New",
+					"fontSize": 11
+				}
+			}
+		},
+		{
+			"objects": {
+				"grpLog": {
+					"type": "groupBox",
+					"left": 20,
+					"top": 84,
+					"width": 1140,
+					"height": 360,
+					"text": "Every call the component made in this session"
+				},
+				"logList": {
+					"type": "listbox",
+					"listboxType": "collection",
+					"left": 32,
+					"top": 112,
+					"width": 1116,
+					"height": 320,
+					"dataSource": "Form.log",
+					"currentItemSource": "Form.selectedLog",
+					"rowHeight": "24px",
+					"verticalAlign": "middle",
+					"resizingMode": "legacy",
+					"columns": [
+						{
+							"name": "logTime",
+							"dataSource": "This.time",
+							"width": 90,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrLogTime",
+								"text": "Time"
+							}
+						},
+						{
+							"name": "logOperation",
+							"dataSource": "This.operation",
+							"width": 110,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrLogOperation",
+								"text": "Operation"
+							}
+						},
+						{
+							"name": "logStatus",
+							"dataSource": "This.status",
+							"width": 70,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrLogStatus",
+								"text": "Status"
+							}
+						},
+						{
+							"name": "logElapsed",
+							"dataSource": "This.elapsed",
+							"width": 100,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrLogElapsed",
+								"text": "Elapsed"
+							}
+						},
+						{
+							"name": "logNote",
+							"dataSource": "This.note",
+							"width": 746,
+							"truncateMode": "none",
+							"header": {
+								"name": "hdrLogNote",
+								"text": "Note"
+							}
+						}
+					]
+				},
+				"grpSent": {
+					"type": "groupBox",
+					"left": 20,
+					"top": 456,
+					"width": 560,
+					"height": 384,
+					"text": "stdin (password redacted)"
+				},
+				"logRequestText": {
+					"type": "input",
+					"left": 32,
+					"top": 484,
+					"width": 536,
+					"height": 344,
+					"dataSource": "Form.requestText",
+					"dataSourceTypeHint": "text",
+					"multiline": "yes",
+					"wordwrap": "normal",
+					"enterable": false,
+					"fontFamily": "Courier New",
+					"fontSize": 10
+				},
+				"grpRecv": {
+					"type": "groupBox",
+					"left": 600,
+					"top": 456,
+					"width": 560,
+					"height": 384,
+					"text": "stdout and stderr"
+				},
+				"responseText": {
+					"type": "input",
+					"left": 612,
+					"top": 484,
+					"width": 536,
+					"height": 344,
+					"dataSource": "Form.responseText",
+					"dataSourceTypeHint": "text",
+					"multiline": "yes",
+					"wordwrap": "normal",
+					"enterable": false,
+					"fontFamily": "Courier New",
+					"fontSize": 10
+				}
+			}
+		}
+	]
+}
