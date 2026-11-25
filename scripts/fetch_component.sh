@@ -28,7 +28,10 @@ fi
 
 destination="$root/Components"
 package="$destination/$name.4dbase"
-if [ -f "$package/$name.4DZ" ] && [ -x "$package/Resources/bin/macOS/$name" ]; then
+# The CLI binary keeps the repository's lowercase name even though the package
+# is `CalDAV.4dbase`; macOS volumes are usually case-insensitive, so check the
+# exact names rather than a mixed-case path that only resolves on APFS.
+if [ -f "$package/$name.4DZ" ] && [ -x "$package/Resources/bin/macOS/caldav" ]; then
 	echo "component already staged: $package ($tag)"
 	exit 0
 fi
@@ -101,5 +104,5 @@ shutil.rmtree(staging)
 print("staged", final)
 PY
 
-ls -l "$package/Resources/bin/macOS/$name"
+ls -l "$package/Resources/bin/macOS/caldav" "$package/Resources/bin/Windows/caldav.exe"
 echo "done: $package"
