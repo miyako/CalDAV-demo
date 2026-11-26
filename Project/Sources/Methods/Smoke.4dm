@@ -130,6 +130,55 @@ LOG EVENT(Into system standard outputs; "smoke 10 conflict")
 $demo.conflictDemo()
 $checks.push(New object("name"; "stale ETag is refused"; "ok"; (Position("412 conflict"; $demo.statusText)=1); "detail"; $demo.statusText))
 
+// --- 6b. regressions found by studying the demo ----------------------------
+LOG EVENT(Into system standard outputs; "smoke 10b all-day build")
+// All-day events need YYYY-MM-DD dates; RFC 3339 stamps are invalid_request.
+$demo.allDay:=True
+$demo.buildDemo()
+$checks.push(New object("name"; "all-day build"; "ok"; (Position("VALUE=DATE"; $demo.icalendarText)>0); "detail"; $demo.statusText))
+$demo.allDay:=False
+
+LOG EVENT(Into system standard outputs; "smoke 10c escaped summary round trip")
+// A summary with ',' ';' and a long folded line: a text search for the old value
+// misses it, and the write must still change the body.
+$demo.summary:="Original"
+$demo.targetURL:=""
+$demo.createDemo()
+$url:=$demo.targetURL
+$oldETag:=$demo.targetETag
+$demo.summary:="Quarterly plan, review; sign-off and a long tail "+("x"*60)
+$demo.updateDemo()
+var $roundTrip : Object
+var $request : Object
+$request:=$demo.connectionRequest()
+$request.url:=$url
+$roundTrip:=$demo.invoke("get"; $request)
+$detail:=$demo.statusText
+$checks.push(New object("name"; "update with escaped and folded summary"; "ok"; ($roundTrip.ok) && (String($roundTrip.value.data.events[0].summary)=$demo.summary) && ($demo.targetETag#$oldETag); "detail"; $detail))
+$demo.deleteDemo()
+
+LOG EVENT(Into system standard outputs; "smoke 10d utc window")
+$checks.push(New object("name"; "window starts on the UTC date"; "ok"; (Position(Substring(Timestamp; 1; 10)+"T00:00:00Z"; $demo.startText)=1); "detail"; $demo.startText+" vs "+Timestamp))
+
+LOG EVENT(Into system standard outputs; "smoke 10e protocol log")
+// Every entry keeps its own redacted request and raw streams, and selecting an
+// older entry shows that call, not the latest one.
+var $kept : Boolean
+$kept:=True
+For ($i; 1; $demo.log.length)
+	If (Length(String($demo.log[$i-1].request))=0)
+		$kept:=False
+	End if
+	If (Position("demo"; String($demo.log[$i-1].request))>0)
+		If (Position("\"password\":\"demo\""; String($demo.log[$i-1].request))>0)
+			$kept:=False
+		End if
+	End if
+End for
+$demo.selectedLog:=$demo.log[$demo.log.length-1]
+$demo.selectLog()
+$checks.push(New object("name"; "protocol log keeps per-entry request"; "ok"; $kept && ($demo.requestText=String($demo.log[$demo.log.length-1].request)); "detail"; String($demo.log.length)+" entries, password redacted"))
+
 // --- 7. a closed door is reported, not swallowed ---------------------------
 LOG EVENT(Into system standard outputs; "smoke 11 plain http refused")
 $demo.loopback:=False

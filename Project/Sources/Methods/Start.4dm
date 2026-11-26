@@ -6,7 +6,6 @@
 var $title : Text
 var $window : Integer
 var $i : Integer
-var $left; $top; $right; $bottom : Integer
 $title:="CalDAV demo"
 
 If (Count parameters=0)
@@ -17,8 +16,7 @@ If (Count parameters=0)
 	For ($i; 1; Size of array($windows))
 		$window:=$windows{$i}
 		If (Window process($window)=1) && (Get window title($window)=$title)
-			GET WINDOW RECT($left; $top; $right; $bottom; $window)
-			CALL FORM($window; Formula(SET WINDOW RECT($left; $top; $right; $bottom; $window)))
+			BRING TO FRONT(Window process($window))
 			return 
 		End if 
 	End for 

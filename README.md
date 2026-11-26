@@ -20,7 +20,7 @@ Start.4dm ──▶ Main form ──▶ DemoForm (form class) ──▶ cs.CalDA
 | Page | What it shows | Press |
 | --- | --- | --- |
 | **Server** | `version()` first, then `discover()`: principal URL, calendar home, and the collections with their reported component sets | `Discover` |
-| **Query** | `query()` with a live time window (`UTC now` … `UTC now + 7 days`), the raw iCalendar of each hit, and `get()` on demand | `Query`, `Get` |
+| **Query** | `query()` with a live time window (UTC today 00:00 … + 7 days), the raw iCalendar of each hit, and `get()` on demand | `Query`, `Get` |
 | **Offline** | `build()` from a form, `inspect()` of the result, and `inspect()` of a document you deliberately break | `Build`, `Inspect`, `Load` |
 | **Mutate** | `create()` with generated content, `update()` with a conditional ETag, `delete()` with the ETag it just read, and a scripted 412 conflict | `Create`, `Update`, `Delete`, `Conflict` |
 | **Protocol log** | Every call: operation, elapsed time, status, the redacted request JSON and the raw CLI stdout/stderr | — |
@@ -82,7 +82,7 @@ PASS component version — component 0.1.2 · protocol 1
 PASS discover — calendars=3 home=http://127.0.0.1:58698/dav/home/
 PASS query — resources=2 window=2026-11-26T00:00:00Z..2026-12-03T00:00:00Z
 ...
-13/13 checks passed (tool4d exit 0)
+17/17 checks passed (tool4d exit 0)
 ```
 
 `Smoke.4dm` is an ordinary project method; it constructs the same `DemoForm` class
@@ -136,11 +136,11 @@ tools/                             boon / fourdform / tool4d-lsp-stdio (git-igno
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Form schema | `tools/4dform/boon --schema …formsSchema.json … form.4DForm` | ok |
+| Form schema | `tools/4dform/boon …formsSchema.json … form.4DForm` | ok |
 | Layout overlap | `form_layout_calc.py --form … --page 1..5` | none |
 | Source syntax | `tools/4dlsp/tool4d-lsp-stdio validate --workspace Project/` | only `cs.CalDAV is unknown` (see NOTES) |
 | Mock contract | `scripts/selftest_mock.py --cli Components/…/caldav` | 18 passed |
-| End-to-end | `scripts/smoke.sh` | 13/13, tool4d exit 0 |
+| End-to-end | `scripts/smoke.sh` | 17/17, tool4d exit 0 |
 
 ## Notes, chokepoints and dead ends
 

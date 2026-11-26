@@ -281,7 +281,7 @@
 					"resizingMode": "legacy",
 					"method": "ObjectMethods/calendarList.4dm",
 					"events": [
-						"onClick"
+						"onSelectionChange"
 					],
 					"columns": [
 						{
@@ -439,7 +439,7 @@
 					"resizingMode": "legacy",
 					"method": "ObjectMethods/resourceList.4dm",
 					"events": [
-						"onClick"
+						"onSelectionChange"
 					],
 					"columns": [
 						{
@@ -910,7 +910,11 @@
 								"text": "Note"
 							}
 						}
-					]
+					],
+					"events": [
+						"onSelectionChange"
+					],
+					"method": "ObjectMethods/logList.4dm"
 				},
 				"grpSent": {
 					"type": "groupBox",

@@ -20,7 +20,7 @@ commit when you are reproducing the results in `NOTES.md`.
    artifact and is git-ignored. Reproduce it with `scripts/fetch_component.sh`,
    which reads the tag from `Project/Sources/dependencies.json`.
 2. **Validate before claiming.** Form JSON must pass
-   `tools/4dform/boon --schema .agents/schemas/4dform/formsSchema.json`, layout
+   `tools/4dform/boon .agents/schemas/4dform/formsSchema.json Project/Sources/Forms/Main/form.4DForm`, layout
    must pass `form_layout_calc.py` for every page, and behaviour must pass
    `scripts/smoke.sh`. `cs.CalDAV is unknown` from `tool4d-lsp-stdio validate` is
    the documented class-store limitation, not a regression (see `NOTES.md`).
@@ -40,7 +40,7 @@ commit when you are reproducing the results in `NOTES.md`.
 
 ```sh
 scripts/fetch_component.sh              # stage Components/CalDAV.4dbase (pinned tag)
-scripts/smoke.sh                        # mock + tool4d + 13 checks
+scripts/smoke.sh                        # mock + tool4d + 17 checks
 scripts/smoke.sh --tool4d PATH
 python3 scripts/mock_caldav.py --port 8787
 python3 scripts/selftest_mock.py --cli Components/CalDAV.4dbase/Resources/bin/macOS/caldav
