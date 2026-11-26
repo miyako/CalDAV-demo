@@ -87,14 +87,20 @@ Class constructor()
 // Small helpers
 // ---------------------------------------------------------------------------
 
-// A whole-second RFC 3339 UTC timestamp relative to today, which is what the
-// CLI accepts for query bounds and for event start/end.
-// The CLI wants whole-second RFC 3339 UTC stamps. String(value; ISO date) and
-// String(value; ISO time) both render as 0000-00-00T00:00:00-style ISO stamps,
-// so the date part is cut to 10 characters and the clock is formatted by hand.
+// The UTC calendar date today. Current date is the *local* date, which near
+// local midnight differs from the UTC date the fields are labelled with;
+// Timestamp is always UTC ("2026-11-26T05:44:44.123Z").
+Function utcToday()->$date : Date
+
+	$date:=Date(Substring(Timestamp; 1; 10))
+
+// A whole-second RFC 3339 UTC timestamp relative to the UTC date today, which is
+// what the CLI accepts for query bounds and for event start/end.
+// String(value; ISO date) renders as 0000-00-00T00:00:00, so the date part is
+// cut to 10 characters and the clock is formatted by hand.
 Function utcStamp($days : Integer; $hour : Integer; $minute : Integer)->$stamp : Text
 
-	$stamp:=Substring(String(Current date+$days; ISO date); 1; 10)+"T"+This.pad2($hour)+":"+This.pad2($minute)+":00Z"
+	$stamp:=Substring(String(This.utcToday()+$days; ISO date); 1; 10)+"T"+This.pad2($hour)+":"+This.pad2($minute)+":00Z"
 
 Function pad2($value : Integer)->$text : Text
 
@@ -118,7 +124,17 @@ Function hasComponent()->$ok : Boolean
 
 Function missingComponent()->$result : Object
 
-	$result:=New object("ok"; False; "error"; New object("code"; "component_missing"; "message"; "cs.CalDAV is Null: stage CalDAV.4dbase in Project/Components/"); "stdout"; ""; "stderr"; "")
+	$result:=New object("ok"; False; "error"; New object("code"; "component_missing"; "message"; "cs.CalDAV is Null: stage CalDAV.4dbase in Components/ beside the Project/ folder (scripts/fetch_component.sh)"); "stdout"; ""; "stderr"; "")
+
+// A resource URL is the collection URL plus a name, so the collection URL must
+// end in a slash; a server may report it without one.
+Function resourceURL($collection : Text; $prefix : Text)->$url : Text
+
+	$url:=$collection
+	If (Substring($url; Length($url); 1)#"/")
+		$url:=$url+"/"
+	End if
+	$url:=$url+$prefix+Replace string(Generate UUID; "-"; "")+".ics"
 
 Function calendarController()->$calendar : cs.CalDAV.Calendar
 
@@ -145,6 +161,15 @@ Function connectionRequest()->$request : Object
 Function eventRequest()->$request : Object
 
 	$request:=New object("summary"; This.summary; "start"; This.eventStart; "end"; This.eventEnd; "allDay"; This.allDay)
+	If (This.allDay)
+		// All-day events take plain YYYY-MM-DD dates with an exclusive end later
+		// than the start; RFC 3339 stamps are refused as invalid_request.
+		$request.start:=Substring(This.eventStart; 1; 10)
+		$request.end:=Substring(This.eventEnd; 1; 10)
+		If ($request.end<=$request.start)
+			$request.end:=Substring(String(Date($request.start)+1; ISO date); 1; 10)
+		End if
+	End if
 	If (Length(This.location)>0)
 		$request.location:=This.location
 	End if
@@ -173,15 +198,24 @@ Function record($operation : Text; $request : Object; $result : Object; $elapsed
 	If (Not($result.ok))
 		$status:="fail"
 	End if
-	$entry:=New object("time"; This.clockText(); "operation"; $operation; "status"; $status; "elapsed"; String($elapsed)+" ms"; "note"; This.note($result))
+	$entry:=New object("time"; This.clockText(); "operation"; $operation; "status"; $status; "elapsed"; String($elapsed)+" ms"; "note"; This.note($result); "request"; This.redactedRequest($request); "response"; This.rawResponse($result))
 	This.log.unshift($entry)
 	While (This.log.length>200)
 		This.log.pop()
 	End while
 	This.selectedLog:=$entry
 	This.lastOperation:=$operation+" — "+$status+" — "+String($elapsed)+" ms"
-	This.requestText:=This.redactedRequest($request)
-	This.responseText:=This.rawResponse($result)
+	This.requestText:=$entry.request
+	This.responseText:=$entry.response
+
+// Selecting an older log entry shows the request and streams of that call, not
+// of the latest one.
+Function selectLog()
+
+	If (Value type(This.selectedLog)=Is object)
+		This.requestText:=String(This.selectedLog.request)
+		This.responseText:=String(This.selectedLog.response)
+	End if
 
 Function note($result : Object)->$note : Text
 
@@ -240,13 +274,16 @@ Function rawResponse($result : Object)->$text : Text
 
 Function joinComponents($components : Collection)->$text : Text
 
+	var $component : Text
 	$text:=""
-	For each ($component; $components)
-		If (Length($text)>0)
-			$text:=$text+", "
-		End If
-		$text:=$text+String($component)
-	End for each
+	If (Value type($components)=Is collection)
+		For each ($component; $components)
+			If (Length($text)>0)
+				$text:=$text+", "
+			End if
+			$text:=$text+$component
+		End for each
+	End if
 
 // Map a component resource into the flat row the list boxes display.
 Function toRow($resource : Object)->$row : Object
@@ -264,6 +301,13 @@ Function toRow($resource : Object)->$row : Object
 		End if
 		$start:=String($first.start)
 		$end:=String($first.end)
+		// startUTC/endUTC are reported for timed events; DATE values have none.
+		If (Length(String($first.startUTC))>0)
+			$start:=String($first.startUTC)
+		End if
+		If (Length(String($first.endUTC))>0)
+			$end:=String($first.endUTC)
+		End if
 		If ($first.allDay)
 			$start:=$start+" (all day)"
 		End if
@@ -283,7 +327,7 @@ Function checkComponent()
 
 	var $result : Object
 	If (Not(This.hasComponent()))
-		This.versionText:="component not loaded — stage CalDAV.4dbase in Project/Components/"
+		This.versionText:="component not loaded — stage CalDAV.4dbase in Components/ beside Project/"
 		return
 	End if
 	$result:=This.calendarController().version()
@@ -326,7 +370,11 @@ Function discoverDemo()
 		This.selectedResource:=Null
 		This.principalURL:=""
 		This.homeURL:=""
-		This.statusText:="Discovery failed. Is scripts/mock_caldav.py running? "+This.describe($result)
+		If (String($result.error.code)="component_missing")
+			This.statusText:="Discovery failed. "+This.describe($result)
+		Else
+			This.statusText:="Discovery failed. Is scripts/mock_caldav.py running? "+This.describe($result)
+		End if
 	End if
 
 Function selectCalendar()
@@ -398,7 +446,7 @@ Function showResource()
 	$resource:=This.selectedResource
 	$text:="URL"+Char(13)+String($resource.url)+Char(13)+Char(13)
 	$text:=$text+"ETag"+Char(13)+String($resource.etag)+Char(13)+Char(13)
-	$text:=$text+"resources returned by the query"+Char(13)+String($resource.countText)+Char(13)+Char(13)
+	$text:=$text+"events in this resource"+Char(13)+String($resource.countText)+Char(13)+Char(13)
 	$text:=$text+"----- raw iCalendar, exactly as served -----"+Char(13)+String($resource.icalendar)
 	This.detailText:=$text
 	This.targetURL:=String($resource.url)
@@ -494,7 +542,7 @@ Function createDemo()
 	End if
 	This.icalendarText:=String($build.value.data.icalendar)
 	$request:=This.connectionRequest()
-	$request.url:=String($calendar.url)+"demo-"+Replace string(Generate UUID; "-"; "")+".ics"
+	$request.url:=This.resourceURL(String($calendar.url); "demo-")
 	$request.icalendar:=String($build.value.data.icalendar)
 	$result:=This.invoke("create"; $request)
 	If ($result.ok)
@@ -548,9 +596,13 @@ Function updateDemo()
 		This.statusText:="The summary already reads \""+$old+"\" — edit it before writing."
 		return
 	End if
-	If (Length($old)>0)
-		// Replace the first SUMMARY only: a series keeps its exception text.
-		$ical:=Replace string($ical; "SUMMARY:"+$old; "SUMMARY:"+$new; 1)
+	// Replace the first SUMMARY line only: a series keeps its exception text.
+	// A text search for the old summary would miss escaped (A\, B) or folded
+	// lines and then PUT the body back unchanged.
+	$ical:=This.replaceSummary($ical; $new)
+	If (Length($ical)=0)
+		This.statusText:="No SUMMARY property found in the resource — nothing was written."
+		return
 	End if
 	$request.icalendar:=$ical
 	$request.etag:=String($get.value.data.etag)
@@ -558,13 +610,63 @@ Function updateDemo()
 	If ($result.ok)
 		$updated:=String($result.value.data.url)
 		This.targetURL:=$updated
+		This.resultText:="updated"+Char(13)+$updated+Char(13)+Char(13)+"new etag"+Char(13)+String($result.value.data.etag)
+		// Report what happened, not what was expected: a server may keep the ETag.
+		If (String($result.value.data.etag)#String($request.etag))
+			This.statusText:="Updated "+$updated+" — the ETag rotated"
+		Else
+			This.statusText:="Updated "+$updated+" — the server kept the same ETag"
+		End if
 		This.targetETag:=String($result.value.data.etag)
-		This.resultText:="updated"+Char(13)+This.targetURL+Char(13)+Char(13)+"new etag"+Char(13)+This.targetETag
-		This.statusText:="Updated "+This.targetURL+" — the ETag rotated"
 		This.queryDemo(True)
 		This.selectURL($updated)
 	Else
 		This.statusText:="Update failed — "+This.describe($result)
+	End if
+
+// Escape a value for an iCalendar TEXT property (RFC 5545 section 3.3.11).
+Function escapeText($value : Text)->$text : Text
+
+	$text:=Replace string($value; "\\"; "\\\\")
+	$text:=Replace string($text; ";"; "\\;")
+	$text:=Replace string($text; ","; "\\,")
+	$text:=Replace string($text; Char(13)+Char(10); "\\n")
+	$text:=Replace string($text; Char(13); "\\n")
+	$text:=Replace string($text; Char(10); "\\n")
+
+// Return $ical with the value of its first SUMMARY property replaced, or "" if
+// it has none. Lines are unfolded first so a folded SUMMARY is found whole.
+Function replaceSummary($ical : Text; $value : Text)->$out : Text
+
+	var $unfolded : Text
+	var $lines : Collection
+	var $line : Text
+	var $index; $colon : Integer
+	var $found : Boolean
+	$out:=""
+	$unfolded:=Replace string($ical; Char(13)+Char(10)+" "; "")
+	$unfolded:=Replace string($unfolded; Char(13)+Char(10)+Char(9); "")
+	$unfolded:=Replace string($unfolded; Char(10)+" "; "")
+	$lines:=Split string($unfolded; Char(13)+Char(10))
+	If ($lines.length<2)
+		$lines:=Split string($unfolded; Char(10))
+	End if
+	$found:=False
+	For ($index; 0; $lines.length-1)
+		$line:=$lines[$index]
+		If (Not($found))
+			If ((Position("SUMMARY:"; $line)=1) | (Position("SUMMARY;"; $line)=1))
+				$colon:=Position(":"; $line)
+				$lines[$index]:=Substring($line; 1; $colon)+This.escapeText($value)
+				$found:=True
+			End if
+		End if
+	End for
+	If ($found)
+		$out:=$lines.join(Char(13)+Char(10))
+		If (Substring($out; Length($out)-1; 2)#(Char(13)+Char(10)))
+			$out:=$out+Char(13)+Char(10)
+		End if
 	End if
 
 Function deleteDemo()
@@ -611,7 +713,7 @@ Function conflictDemo()
 		return
 	End if
 	$request:=This.connectionRequest()
-	$request.url:=String($calendar.url)+"conflict-"+Replace string(Generate UUID; "-"; "")+".ics"
+	$request.url:=This.resourceURL(String($calendar.url); "conflict-")
 	$request.icalendar:=String($build.value.data.icalendar)
 	$result:=This.invoke("create"; $request)
 	If (Not($result.ok))
